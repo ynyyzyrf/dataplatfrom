@@ -1,0 +1,44 @@
+# Python
+__pycache__/
+*.py[cod]
+*.egg-info/
+dist/
+*.egg
+.venv/
+venv/
+env/
+
+# Environment
+.env
+.env.local
+.env.production
+
+# Node
+node_modules/
+frontend/dist/
+
+# IDE
+.idea/
+.vscode/
+*.swp
+*.swo
+
+# OS
+.DS_Store
+Thumbs.db
+
+# Database
+*.db
+*.sqlite3
+
+# Storage (uploaded files)
+storage/uploads/
+storage/temp/
+
+# Alembic (auto generated revisions are checked in, but not special)
+alembic/versions/.gitkeep
+
+# Testing
+.coverage
+htmlcov/
+.test_gdp.db*
