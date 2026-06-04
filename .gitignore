@@ -42,3 +42,6 @@ alembic/versions/.gitkeep
 .coverage
 htmlcov/
 .test_gdp.db*
+
+# OMC state
+.omc/
