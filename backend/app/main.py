@@ -18,7 +18,9 @@ from fastapi.middleware.cors import CORSMiddleware
 from app.api.v1.api_v1 import router as api_v1_router
 from app.config import settings
 from app.core.exceptions import AppError, app_exception_handler
-from app.database import async_engine
+from app.database import Base, async_engine, async_session_factory
+from app.middleware.audit import AuditMiddleware
+from app.services.role_service import seed_default_roles
 
 logger = logging.getLogger(__name__)
 
@@ -29,7 +31,16 @@ logger = logging.getLogger(__name__)
 async def lifespan(app: FastAPI):
     """Startup / shutdown hooks."""
     logger.info("Starting %s v%s", app.title, app.version)
+
+    # Auto-create tables and seed default roles/permissions
+    async with async_engine.begin() as conn:
+        await conn.run_sync(Base.metadata.create_all)
+    async with async_session_factory() as session:
+        await seed_default_roles(session)
+        await session.commit()
+
     yield
+
     logger.info("Shutting down %s", app.title)
     await async_engine.dispose()
 
@@ -53,6 +64,9 @@ app.add_middleware(
     allow_methods=["*"],
     allow_headers=["*"],
 )
+
+# Audit logging (before global exception handler)
+app.add_middleware(AuditMiddleware)
 
 # Global exception handler
 app.add_exception_handler(AppError, app_exception_handler)

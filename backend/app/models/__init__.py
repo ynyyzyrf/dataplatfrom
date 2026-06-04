@@ -11,8 +11,11 @@ from app.models.sync_job import SyncJob, SyncJobRun
 from app.models.data_mapping import FieldMapping
 from app.models.raw_record import RawApiRecord
 from app.models.dashboard import Dashboard, DashboardWidget
+from app.models.dashboard_share import DashboardShare
 from app.models.component import CustomComponent, CustomComponentVersion
 from app.models.audit_log import AuditLog
+from app.models.alert_rule import AlertRule
+from app.models.notification import Notification
 
 __all__ = [
     "Base",
@@ -21,7 +24,9 @@ __all__ = [
     "SyncJob", "SyncJobRun",
     "FieldMapping",
     "RawApiRecord",
-    "Dashboard", "DashboardWidget",
+    "Dashboard", "DashboardWidget", "DashboardShare",
     "CustomComponent", "CustomComponentVersion",
     "AuditLog",
+    "AlertRule",
+    "Notification",
 ]

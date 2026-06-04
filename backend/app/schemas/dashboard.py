@@ -1,8 +1,6 @@
-"""Dashboard schemas."""
+"""Dashboard and widget schemas."""
 
 from __future__ import annotations
-
-from uuid import UUID
 
 from pydantic import BaseModel, ConfigDict, Field
 
@@ -25,13 +23,14 @@ class DashboardUpdate(BaseModel):
 class DashboardResponse(BaseModel):
     model_config = ConfigDict(from_attributes=True)
 
-    id: UUID
+    id: str
     name: str
-    description: str | None
+    description: str | None = None
     status: str
     visibility: str
-    created_at: str | None
-    updated_at: str | None
+    created_at: str | None = None
+    updated_at: str | None = None
+    widget_count: int = 0
 
 
 class WidgetCreate(BaseModel):
@@ -58,16 +57,49 @@ class WidgetUpdate(BaseModel):
     position_config: dict | None = None
 
 
-class WidgetResponse(BaseModel):
+class WidgetPreviewResponse(BaseModel):
+    """Widget config as returned in dashboard preview."""
     model_config = ConfigDict(from_attributes=True)
 
-    id: UUID
-    dashboard_id: UUID
+    id: str
     widget_type: str
     title: str
     component_source: str
-    component_key: str | None
-    component_version: str | None
-    query_config: dict | None
-    props_config: dict | None
-    position_config: dict | None
+    component_key: str | None = None
+    component_version: str | None = None
+    query_config: dict = {}
+    props_config: dict = {}
+    data_binding_config: dict = {}
+    event_config: dict = {}
+    visual_config: dict = {}
+    position_config: dict = {}
+
+
+class DashboardPreview(BaseModel):
+    """Full dashboard render config for preview."""
+    model_config = ConfigDict(from_attributes=True)
+
+    id: str
+    name: str
+    description: str | None = None
+    status: str
+    visibility: str
+    layout_config: dict = {}
+    widgets: list[WidgetPreviewResponse] = []
+    created_at: str | None = None
+    updated_at: str | None = None
+
+
+class WidgetResponse(BaseModel):
+    model_config = ConfigDict(from_attributes=True)
+
+    id: str
+    dashboard_id: str
+    widget_type: str
+    title: str
+    component_source: str
+    component_key: str | None = None
+    component_version: str | None = None
+    query_config: dict | None = None
+    props_config: dict | None = None
+    position_config: dict | None = None

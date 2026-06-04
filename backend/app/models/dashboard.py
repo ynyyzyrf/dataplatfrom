@@ -34,6 +34,7 @@ class Dashboard(Base):
     updated_at: Mapped[datetime] = mapped_column(DateTime(timezone=True), server_default=func.now(), onupdate=func.now(), nullable=False)
 
     widgets: Mapped[list["DashboardWidget"]] = relationship(back_populates="dashboard", cascade="all, delete-orphan")
+    shares: Mapped[list["DashboardShare"]] = relationship(back_populates="dashboard", cascade="all, delete-orphan")
 
 
 class DashboardWidget(Base):

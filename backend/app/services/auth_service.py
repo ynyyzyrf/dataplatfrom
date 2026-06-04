@@ -28,9 +28,9 @@ class AuthService:
         result = await db.execute(select(User).where(User.username == username))
         user = result.scalar_one_or_none()
         if not user or not verify_password(password, user.hashed_password):
-            raise UnauthorizedError("Invalid username or password")
+            raise UnauthorizedError("用户名或密码错误")
         if not user.is_active:
-            raise UnauthorizedError("User account is disabled")
+            raise UnauthorizedError("用户账户已停用")
 
         return {
             "access_token": create_access_token(str(user.id)),
@@ -41,13 +41,13 @@ class AuthService:
     async def refresh_token(self, db: AsyncSession, refresh_token: str) -> dict:
         payload = decode_token(refresh_token)
         if payload.get("type") != "refresh":
-            raise UnauthorizedError("Invalid token type")
+            raise UnauthorizedError("令牌类型无效")
 
         user_id = payload.get("sub")
         result = await db.execute(select(User).where(User.id == user_id))
         user = result.scalar_one_or_none()
         if not user or not user.is_active:
-            raise UnauthorizedError("User not found or inactive")
+            raise UnauthorizedError("用户未找到或已停用")
 
         return {
             "access_token": create_access_token(str(user.id)),
@@ -58,7 +58,7 @@ class AuthService:
     async def create_user(self, db: AsyncSession, username: str, email: str, password: str) -> User:
         existing = await db.execute(select(User).where((User.username == username) | (User.email == email)))
         if existing.scalar_one_or_none():
-            raise ConflictError("Username or email already exists")
+            raise ConflictError("用户名或邮箱已存在")
 
         user = User(
             username=username,
@@ -73,5 +73,5 @@ class AuthService:
         result = await db.execute(select(User).where(User.id == user_id))
         user = result.scalar_one_or_none()
         if not user:
-            raise NotFoundError("User not found")
+            raise NotFoundError("用户未找到")
         return user

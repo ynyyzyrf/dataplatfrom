@@ -17,10 +17,10 @@ export default function LoginPage() {
     setLoading(true);
     try {
       await login(values.username, values.password);
-      message.success('Login successful');
+      message.success('登录成功');
       navigate('/dashboards');
     } catch (err: any) {
-      message.error(err.response?.data?.detail || 'Login failed');
+      message.error(err.response?.data?.detail || '登录失败');
     } finally {
       setLoading(false);
     }
@@ -31,9 +31,9 @@ export default function LoginPage() {
     try {
       const { register } = await import('../../api/auth');
       await register(values.username, values.email, values.password);
-      message.success('Registration successful, please login');
+      message.success('注册成功，请登录');
     } catch (err: any) {
-      message.error(err.response?.data?.detail || 'Registration failed');
+      message.error(err.response?.data?.detail || '注册失败');
     } finally {
       setLoading(false);
     }
@@ -43,45 +43,45 @@ export default function LoginPage() {
     <div style={{ minHeight: '100vh', display: 'flex', alignItems: 'center', justifyContent: 'center', background: '#f0f2f5' }}>
       <Card style={{ width: 420, boxShadow: '0 2px 8px rgba(0,0,0,0.1)' }}>
         <div style={{ textAlign: 'center', marginBottom: 24 }}>
-          <Title level={3}>General Data Platform</Title>
-          <Text type="secondary">Enterprise Data Platform</Text>
+          <Title level={3}>通用数据平台</Title>
+          <Text type="secondary">企业数据平台</Text>
         </div>
         <Tabs
           centered
           items={[
             {
               key: 'login',
-              label: 'Login',
+              label: '登录',
               children: (
                 <Form onFinish={handleLogin} layout="vertical" size="large">
-                  <Form.Item name="username" rules={[{ required: true, message: 'Please enter username' }]}>
-                    <Input prefix={<UserOutlined />} placeholder="Username" />
+                  <Form.Item name="username" rules={[{ required: true, message: '请输入用户名' }]}>
+                    <Input prefix={<UserOutlined />} placeholder="用户名" />
                   </Form.Item>
-                  <Form.Item name="password" rules={[{ required: true, message: 'Please enter password' }]}>
-                    <Input.Password prefix={<LockOutlined />} placeholder="Password" />
+                  <Form.Item name="password" rules={[{ required: true, message: '请输入密码' }]}>
+                    <Input.Password prefix={<LockOutlined />} placeholder="密码" />
                   </Form.Item>
                   <Button type="primary" htmlType="submit" block loading={loading}>
-                    Login
+                    登录
                   </Button>
                 </Form>
               ),
             },
             {
               key: 'register',
-              label: 'Register',
+              label: '注册',
               children: (
                 <Form onFinish={handleRegister} layout="vertical" size="large">
-                  <Form.Item name="username" rules={[{ required: true, message: 'Please enter username' }]}>
-                    <Input prefix={<UserOutlined />} placeholder="Username" />
+                  <Form.Item name="username" rules={[{ required: true, message: '请输入用户名' }]}>
+                    <Input prefix={<UserOutlined />} placeholder="用户名" />
                   </Form.Item>
-                  <Form.Item name="email" rules={[{ required: true, type: 'email', message: 'Valid email required' }]}>
-                    <Input placeholder="Email" />
+                  <Form.Item name="email" rules={[{ required: true, type: 'email', message: '请输入有效邮箱' }]}>
+                    <Input placeholder="邮箱" />
                   </Form.Item>
-                  <Form.Item name="password" rules={[{ required: true, min: 6, message: 'Password must be at least 6 characters' }]}>
-                    <Input.Password prefix={<LockOutlined />} placeholder="Password" />
+                  <Form.Item name="password" rules={[{ required: true, min: 6, message: '密码长度不能少于6位' }]}>
+                    <Input.Password prefix={<LockOutlined />} placeholder="密码" />
                   </Form.Item>
                   <Button type="primary" htmlType="submit" block loading={loading}>
-                    Register
+                    注册
                   </Button>
                 </Form>
               ),

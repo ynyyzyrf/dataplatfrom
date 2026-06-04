@@ -6,6 +6,13 @@ import {
   DashboardOutlined,
   ApiOutlined,
   SyncOutlined,
+  DatabaseOutlined,
+  TeamOutlined,
+  SafetyOutlined,
+  AuditOutlined,
+  AlertOutlined,
+  BellOutlined,
+  MonitorOutlined,
   UserOutlined,
   LogoutOutlined,
   MenuFoldOutlined,
@@ -17,9 +24,18 @@ import { useAuthStore } from '../../stores/auth';
 const { Header, Sider, Content } = Layout;
 
 const menuItems = [
-  { key: '/dashboards', icon: <DashboardOutlined />, label: 'Dashboard' },
-  { key: '/data-sources', icon: <ApiOutlined />, label: 'Data Sources' },
-  { key: '/sync-jobs', icon: <SyncOutlined />, label: 'Sync Jobs' },
+  { key: '/dashboards', icon: <DashboardOutlined />, label: '仪表盘' },
+  { key: '/data-sources', icon: <ApiOutlined />, label: '数据源' },
+  { key: '/sync-jobs', icon: <SyncOutlined />, label: '同步任务' },
+  { key: '/data-records', icon: <DatabaseOutlined />, label: '数据浏览' },
+  { key: '/monitoring', icon: <MonitorOutlined />, label: '监控' },
+  { type: 'divider' as const },
+  { key: '/alert-rules', icon: <AlertOutlined />, label: '告警规则' },
+  { key: '/notifications', icon: <BellOutlined />, label: '通知' },
+  { type: 'divider' as const },
+  { key: '/users', icon: <TeamOutlined />, label: '用户管理' },
+  { key: '/roles', icon: <SafetyOutlined />, label: '角色管理' },
+  { key: '/audit-logs', icon: <AuditOutlined />, label: '审计日志' },
 ];
 
 export default function AppLayout() {
@@ -35,9 +51,9 @@ export default function AppLayout() {
   };
 
   const userMenuItems = [
-    { key: 'profile', icon: <UserOutlined />, label: user?.username || 'User' },
+    { key: 'profile', icon: <UserOutlined />, label: user?.username || '用户' },
     { type: 'divider' as const },
-    { key: 'logout', icon: <LogoutOutlined />, label: 'Logout', danger: true, onClick: handleLogout },
+    { key: 'logout', icon: <LogoutOutlined />, label: '退出登录', danger: true, onClick: handleLogout },
   ];
 
   return (

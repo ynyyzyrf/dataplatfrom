@@ -2,9 +2,9 @@
 
 from __future__ import annotations
 
-from uuid import UUID
+from datetime import datetime
 
-from pydantic import BaseModel, ConfigDict, Field
+from pydantic import BaseModel, ConfigDict, Field, field_serializer
 
 
 class DataSourceCreate(BaseModel):
@@ -35,20 +35,36 @@ class DataSourceUpdate(BaseModel):
     body_config: dict | None = None
     timeout_seconds: int | None = None
     retry_count: int | None = None
+    status: str | None = None
 
 
 class DataSourceResponse(BaseModel):
     model_config = ConfigDict(from_attributes=True)
 
-    id: UUID
+    id: str
     name: str
-    description: str | None
-    group: str | None
+    description: str | None = None
+    group: str | None = None
     request_method: str
     request_url: str
     auth_type: str
-    headers_config: dict | None
-    query_config: dict | None
+    headers_config: dict | None = None
+    query_config: dict | None = None
+    body_config: dict | None = None
+    timeout_seconds: int = 30
+    retry_count: int = 3
     status: str
-    created_at: str | None
-    updated_at: str | None
+    created_by: str
+    created_at: datetime | None = None
+    updated_at: datetime | None = None
+
+    @field_serializer("created_at", "updated_at")
+    def serialize_datetime(self, dt: datetime | None) -> str | None:
+        if dt is None:
+            return None
+        return dt.isoformat()
+
+
+class DataSourceDetail(DataSourceResponse):
+    auth_config: dict | None = None
+    sync_job_count: int = 0

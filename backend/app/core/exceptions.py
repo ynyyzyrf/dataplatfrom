@@ -21,7 +21,7 @@ class AppError(Exception):
 
     def __init__(
         self,
-        message: str = "Application error",
+        message: str = "应用错误",
         status_code: HTTPStatus | int = HTTPStatus.INTERNAL_SERVER_ERROR,
         detail: dict | None = None,
     ):
@@ -34,28 +34,28 @@ class AppError(Exception):
 class NotFoundError(AppError):
     """Resource not found."""
 
-    def __init__(self, message: str = "Resource not found"):
+    def __init__(self, message: str = "资源未找到"):
         super().__init__(message=message, status_code=HTTPStatus.NOT_FOUND)
 
 
 class UnauthorizedError(AppError):
     """Authentication or authorization failed."""
 
-    def __init__(self, message: str = "Unauthorized"):
+    def __init__(self, message: str = "未授权"):
         super().__init__(message=message, status_code=HTTPStatus.UNAUTHORIZED)
 
 
 class ConflictError(AppError):
     """Resource already exists or conflict."""
 
-    def __init__(self, message: str = "Resource conflict"):
+    def __init__(self, message: str = "资源冲突"):
         super().__init__(message=message, status_code=HTTPStatus.CONFLICT)
 
 
 class ValidationError(AppError):
     """Business logic validation failed."""
 
-    def __init__(self, message: str = "Validation error"):
+    def __init__(self, message: str = "验证错误"):
         super().__init__(message=message, status_code=HTTPStatus.UNPROCESSABLE_ENTITY)
 
 

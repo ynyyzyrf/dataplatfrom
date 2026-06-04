@@ -27,12 +27,19 @@ __all__ = [
 
 # Engine & session factory
 
+_engine_kwargs = {
+    "echo": settings.database_echo,
+}
+if not settings.database_url_plain.startswith("sqlite"):
+    _engine_kwargs.update({
+        "pool_size": settings.database_pool_size,
+        "max_overflow": settings.database_max_overflow,
+        "pool_pre_ping": True,
+    })
+
 async_engine = create_async_engine(
     settings.database_url_plain,
-    echo=settings.database_echo,
-    pool_size=settings.database_pool_size,
-    max_overflow=settings.database_max_overflow,
-    pool_pre_ping=True,
+    **_engine_kwargs,
 )
 
 async_session_factory = async_sessionmaker(

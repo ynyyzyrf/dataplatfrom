@@ -66,7 +66,7 @@ def decode_token(token: str) -> dict:
     except JWTError as exc:
         raise HTTPException(
             status_code=status.HTTP_401_UNAUTHORIZED,
-            detail="Invalid or expired token",
+            detail="令牌无效或已过期",
             headers={"WWW-Authenticate": "Bearer"},
         ) from exc
 
@@ -81,14 +81,14 @@ async def get_current_user(
     """Extract and validate the current user from the bearer token."""
     payload = decode_token(token)
     if payload.get("type") != "access":
-        raise HTTPException(status_code=401, detail="Invalid token type")
+        raise HTTPException(status_code=401, detail="令牌类型无效")
 
     user_id: str | None = payload.get("sub")
     if not user_id:
-        raise HTTPException(status_code=401, detail="Missing user id in token")
+        raise HTTPException(status_code=401, detail="令牌中缺少用户ID")
 
     result = await db.execute(select(User).where(User.id == user_id))
     user = result.scalar_one_or_none()
     if not user or not user.is_active:
-        raise HTTPException(status_code=401, detail="User not found or inactive")
+        raise HTTPException(status_code=401, detail="用户未找到或已停用")
     return user
