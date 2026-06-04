@@ -1,6 +1,6 @@
 /** Dashboard Builder — drag-and-drop widget layout editor */
 
-import { useState, useEffect, useCallback, useMemo } from 'react';
+import { useState, useEffect, useCallback, useMemo, useRef } from 'react';
 import { useParams, useNavigate } from 'react-router-dom';
 import {
   Layout, Card, Row, Col, Button, Modal, Input, Select,
@@ -13,7 +13,7 @@ import {
   TableOutlined, NumberOutlined, FilterOutlined,
   FontSizeOutlined, CodeOutlined, ArrowLeftOutlined,
 } from '@ant-design/icons';
-import { Responsive as ResponsiveGridLayout } from 'react-grid-layout';
+import { Responsive, useContainerWidth } from 'react-grid-layout';
 import 'react-grid-layout/css/styles.css';
 import 'react-resizable/css/styles.css';
 import client from '../../api/client';
@@ -324,54 +324,17 @@ export default function DashboardBuilder() {
         </div>
 
         {/* Center: Canvas */}
-        <div style={{ flex: 1, overflowY: 'auto', background: '#fafafa', borderRadius: 8, padding: 8, minHeight: 400 }}>
-          {dashboard.widgets.length === 0 ? (
-            <Empty description="从左侧面板拖拽组件或点击添加" style={{ marginTop: 80 }} />
-          ) : (
-            <ResponsiveGridLayout
-              className="layout"
-              layouts={layouts}
-              breakpoints={{ lg: 1200, md: 996, sm: 768, xs: 480, xxs: 0 }}
-              cols={{ lg: 12, md: 10, sm: 6, xs: 4, xxs: 2 }}
-              rowHeight={80}
-              onLayoutChange={(l) => onLayoutChange(l)}
-              draggableHandle=".widget-drag-handle"
-              isResizable={true}
-              isDraggable={true}
-            >
-              {dashboard.widgets.map((widget) => (
-                <div
-                  key={widget.id}
-                  style={{
-                    background: selectedWidgetId === widget.id ? '#e6f4ff' : '#fff',
-                    border: selectedWidgetId === widget.id ? '2px solid #1677ff' : '1px solid #d9d9d9',
-                    borderRadius: 6,
-                    padding: 8,
-                    cursor: 'pointer',
-                    overflow: 'hidden',
-                  }}
-                  onClick={() => setSelectedWidgetId(widget.id)}
-                >
-                  <div className="widget-drag-handle" style={{ cursor: 'move', display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: 4 }}>
-                    <Space size={4}>
-                      {WIDGET_TYPES[widget.widget_type]?.icon}
-                      <strong style={{ fontSize: 12 }}>{widget.title}</strong>
-                    </Space>
-                    <Dropdown menu={{ items: [
-                      { key: 'dup', icon: <CopyOutlined />, label: '复制', onClick: (e) => { e.domEvent.stopPropagation(); duplicateWidget(widget); } },
-                      { key: 'del', icon: <DeleteOutlined />, label: '删除', danger: true, onClick: (e) => { e.domEvent.stopPropagation(); deleteWidget(widget.id); } },
-                    ]}} trigger={['click']}>
-                      <Button size="small" type="text" onClick={(e) => e.stopPropagation()}>⋯</Button>
-                    </Dropdown>
-                  </div>
-                  <div style={{ fontSize: 11, color: '#999', textAlign: 'center', paddingTop: 8 }}>
-                    {widget.widget_type.replace('_', ' ').toUpperCase()}
-                  </div>
-                </div>
-              ))}
-            </ResponsiveGridLayout>
-          )}
-        </div>
+        <GridCanvas
+          dashboard={dashboard}
+          selectedWidgetId={selectedWidgetId}
+          setSelectedWidgetId={setSelectedWidgetId}
+          layout={layout}
+          WIDGET_TYPES={WIDGET_TYPES}
+          addWidget={addWidget}
+          duplicateWidget={duplicateWidget}
+          deleteWidget={deleteWidget}
+          onLayoutChange={onLayoutChange}
+        />
 
         {/* Right: Property Panel */}
         <div style={{ width: 320, flexShrink: 0, overflowY: 'auto', borderLeft: '1px solid #f0f0f0', paddingLeft: 8 }}>
@@ -429,9 +392,94 @@ export default function DashboardBuilder() {
   );
 }
 
+// -- Grid Canvas (v2 API: requires width + useContainerWidth) ----------------
+
+interface GridCanvasProps {
+  dashboard: DashboardData;
+  selectedWidgetId: string | null;
+  setSelectedWidgetId: (id: string) => void;
+  layout: LayoutItem[];
+  WIDGET_TYPES: Record<string, { icon: React.ReactNode; label: string; w: number; h: number }>;
+  addWidget: (type: string) => void;
+  duplicateWidget: (widget: WidgetDef) => void;
+  deleteWidget: (id: string) => void;
+  onLayoutChange: (newLayout: LayoutItem[]) => void;
+}
+
+function GridCanvas({
+  dashboard,
+  selectedWidgetId,
+  setSelectedWidgetId,
+  layout,
+  WIDGET_TYPES,
+  addWidget,
+  duplicateWidget,
+  deleteWidget,
+  onLayoutChange,
+}: GridCanvasProps) {
+  const { width, containerRef, mounted } = useContainerWidth();
+
+  if (dashboard.widgets.length === 0) {
+    return (
+      <Empty description="从左侧面板拖拽组件或点击添加" style={{ marginTop: 80 }} />
+    );
+  }
+
+  return (
+    <div ref={containerRef} style={{ width: '100%', height: '100%' }}>
+      {mounted && width > 0 && (
+        <Responsive
+          className="layout"
+          layouts={{ lg: layout }}
+          breakpoints={{ lg: 1200, md: 996, sm: 768, xs: 480, xxs: 0 }}
+          cols={{ lg: 12, md: 10, sm: 6, xs: 4, xxs: 2 }}
+          rowHeight={80}
+          draggableHandle=".widget-drag-handle"
+          width={width}
+          onLayoutChange={(newLayout: LayoutItem[]) => onLayoutChange(newLayout)}
+          // v2 uses resizeConfig / dragConfig instead of isResizable / isDraggable
+          resizeConfig={{ enable: true }}
+          dragConfig={{ enable: true }}
+        >
+          {dashboard.widgets.map((widget) => (
+            <div
+              key={widget.id}
+              style={{
+                background: selectedWidgetId === widget.id ? '#e6f4ff' : '#fff',
+                border: selectedWidgetId === widget.id ? '2px solid #1677ff' : '1px solid #d9d9d9',
+                borderRadius: 6,
+                padding: 8,
+                cursor: 'pointer',
+                overflow: 'hidden',
+              }}
+              onClick={() => setSelectedWidgetId(widget.id)}
+            >
+              <div className="widget-drag-handle" style={{ cursor: 'move', display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: 4 }}>
+                <Space size={4}>
+                  {WIDGET_TYPES[widget.widget_type]?.icon}
+                  <strong style={{ fontSize: 12 }}>{widget.title}</strong>
+                </Space>
+                <Dropdown menu={{ items: [
+                  { key: 'dup', icon: <CopyOutlined />, label: '复制', onClick: (e) => { e.domEvent.stopPropagation(); duplicateWidget(widget); } },
+                  { key: 'del', icon: <DeleteOutlined />, label: '删除', danger: true, onClick: (e) => { e.domEvent.stopPropagation(); deleteWidget(widget.id); } },
+                ]}} trigger={['click']}>
+                  <Button size="small" type="text" onClick={(e) => e.stopPropagation()}>⋯</Button>
+                </Dropdown>
+              </div>
+              <div style={{ fontSize: 11, color: '#999', textAlign: 'center', paddingTop: 8 }}>
+                {widget.widget_type.replace('_', ' ').toUpperCase()}
+              </div>
+            </div>
+          ))}
+        </Responsive>
+      )}
+    </div>
+  );
+}
+
 // -- Sub-panels ----------------------------------------------------------
 
-function BasicPanel({ widget, onChange }: { widget: WidgetDef; onChange: (field: string, value: any) => void }) {
+function BasicPanel({ widget, onChange }: { widget: WidgetDef; onChange: (field: string, value: any) => void; }) {
   return (
     <Space direction="vertical" style={{ width: '100%' }}>
       <div>
