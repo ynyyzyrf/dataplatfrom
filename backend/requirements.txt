@@ -32,3 +32,6 @@ httpx>=0.28.0,<0.29.0
 # -- Utilities --
 structlog>=24.4.0,<24.5.0
 orjson>=3.10.0,<3.11.0
+
+# -- Static file serving (SPA) --
+aiofiles>=24.1.0,<25.0.0
