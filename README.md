@@ -1,93 +1,351 @@
-# test
+# Dataplatform
 
+> **企業級低代碼數據應用平台** — 一站式 API 數據接入、同步、存儲、分析與可視化儀表盤構建
 
+[![Python](https://img.shields.io/badge/Python-3.12-blue)](https://www.python.org/)
+[![FastAPI](https://img.shields.io/badge/FastAPI-0.115-009688)](https://fastapi.tiangolo.com/)
+[![React](https://img.shields.io/badge/React-19-61DAFB)](https://react.dev/)
+[![PostgreSQL](https://img.shields.io/badge/PostgreSQL-16-336791)](https://www.postgresql.org/)
+[![License](https://img.shields.io/badge/License-MIT-green)](LICENSE)
 
-## Getting started
+---
 
-To make it easy for you to get started with GitLab, here's a list of recommended next steps.
+## 📋 目錄
 
-Already a pro? Just edit this README.md and make it your own. Want to make it easy? [Use the template at the bottom](#editing-this-readme)!
+- [項目簡介](#項目簡介)
+- [技術棧](#技術棧)
+- [核心功能](#核心功能)
+- [項目結構](#項目結構)
+- [快速開始](#快速開始)
+- [使用示例](#使用示例)
+- [發展藍圖](#發展藍圖)
+- [貢獻指南](#貢獻指南)
+- [許可證](#許可證)
 
-## Add your files
+---
 
-- [ ] [Create](https://docs.gitlab.com/ee/user/project/repository/web_editor.html#create-a-file) or [upload](https://docs.gitlab.com/ee/user/project/repository/web_editor.html#upload-a-file) files
-- [ ] [Add files using the command line](https://docs.gitlab.com/ee/gitlab-basics/add-file.html#add-a-file-using-the-command-line) or push an existing Git repository with the following command:
+## 項目簡介
+
+**Dataplatform** 是一個面向企業的通用數據平台，旨在解決「多系統 API 數據整合」的痛點。用戶可以：
+
+1. 在前端配置外部系統的 REST API 作為**數據源**
+2. 通過**同步任務**定期拉取數據，存入平台數據庫
+3. 使用拖拽式 **Dashboard Builder** 構建可視化圖表
+4. 配置**告警規則**，在數據異常時即時通知
+5. 通過**基於角色的權限控制 (RBAC)** 管理團隊協作
+
+平台涵蓋從 **API 接入 → 數據同步 → 存儲建模 → 可視化展示 → 監控告警** 的完整閉環，無需編寫後端代碼。
+
+> **開發階段**：Phase 1 & 2 已完成（基礎平台 + Dashboard Builder + 企業級能力）  
+> **最新版本**：v0.1.0
+
+---
+
+## 技術棧
+
+### 後端
+
+| 類別 | 技術 |
+|------|------|
+| 框架 | Python 3.12 + FastAPI 0.115 |
+| ORM | SQLAlchemy 2.0 (async) |
+| 數據庫 | PostgreSQL 16 (jsonb) |
+| 快取/佇列 | Redis 7 |
+| 任務調度 | Celery + Celery Beat |
+| 認證 | JWT (Access + Refresh Token) |
+| 加密 | Fernet (cryptography) |
+| 遷移 | Alembic |
+| 測試 | pytest + httpx + pytest-asyncio |
+
+### 前端
+
+| 類別 | 技術 |
+|------|------|
+| 框架 | React 19 + TypeScript 6 |
+| UI 庫 | Ant Design 6 + @ant-design/charts |
+| 狀態管理 | Zustand 5 |
+| 路由 | React Router 7 |
+| 數據請求 | Axios + @tanstack/react-query |
+| 拖拽引擎 | react-grid-layout v2 + @dnd-kit |
+| 構建工具 | Vite 8 |
+| 國際化 | Ant Design zhCN（全系統簡體中文） |
+
+### DevOps
+
+| 類別 | 技術 |
+|------|------|
+| 容器化 | Docker + docker-compose（7 服務） |
+| 對象存儲 | MinIO |
+
+---
+
+## 核心功能
+
+### 🔌 API 數據源管理
+- 配置 REST API 的 URL、請求方法（GET/POST）、Header
+- 支援多種認證方式：無認證、Bearer Token、API Key（憑證加密存儲）
+- 數據源測試連接，即時查看 API 返回樣例
+
+### 🔄 數據同步任務
+- 全量 / 增量 / 分頁三種同步模式
+- 定時調度（間隔時間 / Cron 表達式）
+- 手動觸發即時同步
+- 執行記錄追蹤（耗時、數據量、錯誤信息）
+
+### 📊 可視化儀表盤構建器
+- **三欄佈局**：組件庫 | 畫布 | 屬性面板
+- **8 種內建組件**：指標卡、數據表、柱狀圖、折線圖、餅圖、篩選器、文本塊、嵌入 (iframe)
+- **拖拽佈局**：自由調整大小與位置
+- **數據綁定**：選擇數據表、維度、指標聚合（計數/求和/平均/最大/最小）
+- **事件聯動**：組件間互動（點擊 → 過濾 → 刷新）
+- **樣式自定義**：背景色、字體、邊框、圓角、邊距
+
+### 📋 儀表盤生命週期 & 分享
+- **三種狀態**：草稿 → 已發布 → 已歸檔
+- **分享機制**：按角色或用戶分配查看 / 編輯權限
+
+### 📝 數據瀏覽
+- 同步完成後直接在頁面查看原始 API 數據
+- 支援按數據源、HTTP 狀態碼、時間範圍篩選
+- 展開單行查看完整 JSON Payload
+
+### 🔔 告警規則引擎
+- **5 種規則類型**：連續失敗、HTTP 錯誤、超時、零數據、令牌過期
+- 同步任務執行後自動評估
+- 多渠道通知：站內通知、電子郵件、Slack、Webhook
+
+### 🔐 RBAC 權限管理
+- 用戶、角色、權限三層模型
+- 預設角色：Admin（管理員）、Editor（編輯者）、Viewer（查看者）
+- 資源級權限控制
+
+### 📜 審計日誌
+- 中間件自動記錄關鍵操作
+- 記錄用戶、動作、資源、IP 地址、請求詳情
+
+---
+
+## 項目結構
 
 ```
-cd existing_repo
-git remote add origin https://gitlab.sjfood.us/osc-ai/test.git
-git branch -M main
-git push -uf origin main
+dataplatform/
+├── backend/
+│   ├── app/
+│   │   ├── api/v1/              # API 路由（12 個模塊）
+│   │   ├── models/              # ORM 模型（18 張業務表）
+│   │   ├── schemas/             # Pydantic schema
+│   │   ├── services/            # 業務邏輯服務層
+│   │   ├── security/            # JWT 認證 + 授權
+│   │   ├── connectors/          # 外部 API 連接器
+│   │   ├── middleware/          # 審計日誌中間件
+│   │   ├── workers/             # Celery 任務定義
+│   │   ├── config.py            # 配置管理
+│   │   ├── database.py          # 數據庫引擎與會話
+│   │   └── main.py              # FastAPI 入口
+│   ├── tests/                   # pytest 測試（72 個測試）
+│   ├── alembic/                 # 數據庫遷移
+│   └── requirements.txt
+├── frontend/
+│   ├── src/
+│   │   ├── pages/               # 頁面組件（12 頁）
+│   │   ├── components/          # 共享組件
+│   │   ├── router/              # 路由配置
+│   │   ├── stores/              # Zustand 狀態管理
+│   │   └── api/                 # API 客戶端
+│   └── package.json
+├── docs/                        # 產品文檔與開發計劃
+├── docker-compose.yml           # 7 服務容器化部署
+└── Makefile                     # 開發命令快捷鍵
 ```
 
-## Integrate with your tools
+---
 
-- [ ] [Set up project integrations](https://gitlab.sjfood.us/osc-ai/test/-/settings/integrations)
+## 快速開始
 
-## Collaborate with your team
+### 前置要求
 
-- [ ] [Invite team members and collaborators](https://docs.gitlab.com/ee/user/project/members/)
-- [ ] [Create a new merge request](https://docs.gitlab.com/ee/user/project/merge_requests/creating_merge_requests.html)
-- [ ] [Automatically close issues from merge requests](https://docs.gitlab.com/ee/user/project/issues/managing_issues.html#closing-issues-automatically)
-- [ ] [Enable merge request approvals](https://docs.gitlab.com/ee/user/project/merge_requests/approvals/)
-- [ ] [Set auto-merge](https://docs.gitlab.com/ee/user/project/merge_requests/merge_when_pipeline_succeeds.html)
+| 工具 | 版本要求 |
+|------|----------|
+| Python | ≥ 3.12 |
+| Node.js | ≥ 20 |
+| PostgreSQL | ≥ 16 |
+| Redis | ≥ 7 |
+| Docker（可選） | ≥ 24 |
 
-## Test and Deploy
+### 環境配置
 
-Use the built-in continuous integration in GitLab.
+```bash
+# 複製環境變數範本
+cp .env.example .env
 
-- [ ] [Get started with GitLab CI/CD](https://docs.gitlab.com/ee/ci/quick_start/index.html)
-- [ ] [Analyze your code for known vulnerabilities with Static Application Security Testing (SAST)](https://docs.gitlab.com/ee/user/application_security/sast/)
-- [ ] [Deploy to Kubernetes, Amazon EC2, or Amazon ECS using Auto Deploy](https://docs.gitlab.com/ee/topics/autodevops/requirements.html)
-- [ ] [Use pull-based deployments for improved Kubernetes management](https://docs.gitlab.com/ee/user/clusters/agent/)
-- [ ] [Set up protected environments](https://docs.gitlab.com/ee/ci/environments/protected_environments.html)
+# 編輯 .env，填入 PostgreSQL 連接資訊
+# GDP_DATABASE_URL=postgresql+asyncpg://postgres:your_password@localhost:5432/gdp
+```
 
-***
+### 本地開發
 
-# Editing this README
+```bash
+# 1. 安裝後端依賴
+cd backend
+pip install -r requirements-dev.txt
 
-When you're ready to make this README your own, just edit this file and use the handy template below (or feel free to structure it however you want - this is just a starting point!). Thanks to [makeareadme.com](https://www.makeareadme.com/) for this template.
+# 2. 安裝前端依賴
+cd frontend
+npm install
 
-## Suggestions for a good README
+# 3. 啟動 PostgreSQL 和 Redis（Docker）
+docker compose up -d postgres redis
 
-Every project is different, so consider which of these sections apply to yours. The sections used in the template are suggestions for most open source projects. Also keep in mind that while a README can be too long and detailed, too long is better than too short. If you think your README is too long, consider utilizing another form of documentation rather than cutting out information.
+# 4. 創建數據庫並執行遷移
+createdb gdp
+cd backend && alembic upgrade head
 
-## Name
-Choose a self-explaining name for your project.
+# 5. 啟動後端開發服務器（熱重載）
+make backend-run     # http://localhost:8000
 
-## Description
-Let people know what your project can do specifically. Provide context and add a link to any reference visitors might be unfamiliar with. A list of Features or a Background subsection can also be added here. If there are alternatives to your project, this is a good place to list differentiating factors.
+# 6. 啟動前端開發服務器（新終端）
+make frontend-dev    # http://localhost:5176
 
-## Badges
-On some READMEs, you may see small images that convey metadata, such as whether or not all the tests are passing for the project. You can use Shields to add some to your README. Many services also have instructions for adding a badge.
+# 7. 運行測試
+make backend-test    # 72 個測試案例
+```
 
-## Visuals
-Depending on what you are making, it can be a good idea to include screenshots or even a video (you'll frequently see GIFs rather than actual videos). Tools like ttygif can help, but check out Asciinema for a more sophisticated method.
+啟動後訪問：
 
-## Installation
-Within a particular ecosystem, there may be a common way of installing things, such as using Yarn, NuGet, or Homebrew. However, consider the possibility that whoever is reading your README is a novice and would like more guidance. Listing specific steps helps remove ambiguity and gets people to using your project as quickly as possible. If it only runs in a specific context like a particular programming language version or operating system or has dependencies that have to be installed manually, also add a Requirements subsection.
+| 服務 | 地址 |
+|------|------|
+| 前端介面 | `http://localhost:5176` |
+| 後端 API | `http://localhost:8000` |
+| Swagger 文檔 | `http://localhost:8000/api/docs` |
+| ReDoc 文檔 | `http://localhost:8000/api/redoc` |
 
-## Usage
-Use examples liberally, and show the expected output if you can. It's helpful to have inline the smallest example of usage that you can demonstrate, while providing links to more sophisticated examples if they are too long to reasonably include in the README.
+### Docker 一鍵部署
 
-## Support
-Tell people where they can go to for help. It can be any combination of an issue tracker, a chat room, an email address, etc.
+```bash
+# 啟動全部服務
+docker compose up -d
 
-## Roadmap
-If you have ideas for releases in the future, it is a good idea to list them in the README.
+# 查看日誌
+docker compose logs -f backend
+```
 
-## Contributing
-State if you are open to contributions and what your requirements are for accepting them.
+---
 
-For people who want to make changes to your project, it's helpful to have some documentation on how to get started. Perhaps there is a script that they should run or some environment variables that they need to set. Make these steps explicit. These instructions could also be useful to your future self.
+## 使用示例
 
-You can also document commands to lint the code or run tests. These steps help to ensure high code quality and reduce the likelihood that the changes inadvertently break something. Having instructions for running tests is especially helpful if it requires external setup, such as starting a Selenium server for testing in a browser.
+### 1. 創建數據源
 
-## Authors and acknowledgment
-Show your appreciation to those who have contributed to the project.
+```bash
+curl -X POST http://localhost:8000/api/v1/data-sources \
+  -H "Authorization: Bearer <your_token>" \
+  -H "Content-Type: application/json" \
+  -d '{
+    "name": "GitHub API",
+    "request_method": "GET",
+    "request_url": "https://api.github.com/repos/rails/rails/issues",
+    "auth_type": "bearer_token",
+    "auth_config": {"token": "ghp_xxxxxx"},
+    "timeout_seconds": 30
+  }'
+```
 
-## License
-For open source projects, say how it is licensed.
+### 2. 創建同步任務
 
-## Project status
-If you have run out of energy or time for your project, put a note at the top of the README saying that development has slowed down or stopped completely. Someone may choose to fork your project or volunteer to step in as a maintainer or owner, allowing your project to keep going. You can also make an explicit request for maintainers.
+```bash
+curl -X POST http://localhost:8000/api/v1/sync-jobs \
+  -H "Authorization: Bearer <your_token>" \
+  -H "Content-Type: application/json" \
+  -d '{
+    "data_source_id": "<ds_id>",
+    "name": "每日同步 Issues",
+    "schedule_type": "cron",
+    "schedule_config": "0 8 * * *",
+    "sync_mode": "full"
+  }'
+```
+
+### 3. 瀏覽同步數據
+
+```bash
+# 分頁查詢數據記錄
+curl -X GET "http://localhost:8000/api/v1/data-records?page=1&page_size=20" \
+  -H "Authorization: Bearer <your_token>"
+
+# 查看單條記錄完整 JSON
+curl -X GET "http://localhost:8000/api/v1/data-records/<record_id>" \
+  -H "Authorization: Bearer <your_token>"
+```
+
+### 4. 創建告警規則
+
+```bash
+curl -X POST http://localhost:8000/api/v1/alert-rules \
+  -H "Authorization: Bearer <your_token>" \
+  -H "Content-Type: application/json" \
+  -d '{
+    "name": "同步連續失敗告警",
+    "rule_type": "consecutive_failures",
+    "target_type": "sync_job",
+    "threshold": 3,
+    "window_minutes": 30,
+    "channels": ["in_app", "email"],
+    "is_active": true
+  }'
+```
+
+---
+
+## 發展藍圖
+
+| 階段 | 狀態 | 內容 |
+|------|------|------|
+| **Phase 1** | ✅ 已完成 | 基礎數據平台閉環（API 接入 → 同步 → 入庫 → 展示） |
+| **Phase 2** | ✅ 已完成 | Dashboard Builder + 告警 + RBAC + 通知 + 分享 + 數據瀏覽 |
+| **Phase 3** | 📋 規劃中 | 自定義組件系統（Manifest + iframe 沙箱 + 版本管理 + 審核） |
+| **Phase 4** | 📋 規劃中 | 智能化與生態化（NL2Query、AI 分析、多租戶、組件市場） |
+
+---
+
+## 貢獻指南
+
+我們歡迎任何形式的貢獻！
+
+### 流程
+
+1. **Fork** 本倉庫
+2. 創建功能分支：`git checkout -b feature/amazing-feature`
+3. 提交變更：`git commit -m 'feat: add amazing feature'`
+4. 推送分支：`git push origin feature/amazing-feature`
+5. 提交 **Pull Request**
+
+### 開發規範
+
+- **提交訊息**：遵循 [Conventional Commits](https://www.conventionalcommits.org/)（`feat:`、`fix:`、`chore:`、`docs:`）
+- **後端**：遵守 PEP 8，使用 ruff 進行 lint/format
+- **前端**：TypeScript 嚴格模式 + ESLint
+- **測試**：新增功能需包含 pytest 測試
+
+### 運行測試
+
+```bash
+# 後端測試
+make backend-test
+
+# 前端類型檢查
+cd frontend && npx tsc --noEmit
+
+# 前端構建
+make frontend-build
+```
+
+---
+
+## 許可證
+
+本項目採用 MIT 許可證。詳見 [LICENSE](LICENSE) 文件。
+
+---
+
+<p align="center">
+  <sub>Built with ❤️ using FastAPI + React + Ant Design</sub>
+</p>
